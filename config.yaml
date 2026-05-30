@@ -1,0 +1,45 @@
+# Shopify Automation Configuration
+# 支持多环境配置
+
+environments:
+  dev:
+    store: "hyl-test.myshopify.com"
+    token: "${SHOPIFY_TOKEN}"
+    theme_id: 151845732535
+    api_version: "2024-10"
+    
+  staging:
+    store: "your-staging-store.myshopify.com"
+    token: "shpat_xxxxxxxxxxxxxxxxxxxxxxxx"
+    theme_id: 123456789
+    api_version: "2024-10"
+    
+  prod:
+    store: "your-production-store.myshopify.com"
+    token: "shpat_xxxxxxxxxxxxxxxxxxxxxxxx"
+    theme_id: 123456789
+    api_version: "2024-10"
+
+# 当前使用的环境
+current_env: dev
+
+# 部署配置
+deploy:
+  # 是否启用增量部署（只上传修改的文件）
+  incremental: true
+  # 备份目录
+  backup_dir: "./backups"
+  # 文件变更检测方式：md5 或 mtime
+  diff_method: "md5"
+  
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/shopify.log"
+
+# 限流配置
+rate_limit:
+  max_retries: 3
+  retry_delay: 2
+  requests_per_second: 2

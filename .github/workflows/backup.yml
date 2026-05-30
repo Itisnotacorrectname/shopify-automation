@@ -1,0 +1,44 @@
+name: Daily Backup
+
+on:
+  schedule:
+    # 每天凌晨 2 点执行
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Backup theme
+        env:
+          SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
+          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+          SHOPIFY_THEME_ID: ${{ secrets.SHOPIFY_THEME_ID }}
+        run: |
+          python maintenance/backup.py
+      
+      - name: Upload backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopify-backup-${{ github.run_number }}
+          path: backups/
+          retention-days: 30
+      
+      - name: Cleanup old backups
+        run: |
+          # 保留最近 30 天的备份
+          find backups/ -type d -mtime +30 -exec rm -rf {} \;
