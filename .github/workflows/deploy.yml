@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  prepare:
     runs-on: ubuntu-latest
     
     steps:
@@ -20,41 +20,24 @@ jobs:
         run: |
           cd automation
           git clone https://github.com/Itisnotacorrectname/hyl-shopify-theme.git theme || \
-          git clone https://github.com/Itisnotacorrectname/HYL独立站.git HYL独立站 || \
-          echo "Theme repository not found, will use local files"
+          echo "Theme not found, using current repo"
           ls -la
       
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
+      - name: Package theme
         run: |
-          cd automation && pip install -r requirements.txt
+          cd automation
+          if [ -d "theme" ]; then
+            cd theme && zip -r ../theme.zip . && cd ..
+          else
+            zip -r theme.zip . --exclude "*.git*" --exclude "shopify-automation/*"
+          fi
+          ls -la *.zip
       
-      - name: Deploy theme
-        env:
-          SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
-          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
-          SHOPIFY_THEME_ID: ${{ secrets.SHOPIFY_THEME_ID }}
-        run: |
-          cd automation && python cli.py deploy --full --theme-dir ./theme || python cli.py deploy --full --theme-dir ./HYL独立站/hyl-shopify-theme
-      
-      - name: Generate sitemap
-        if: success()
-        env:
-          SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
-          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
-        run: |
-          python cli.py sitemap -o sitemap.xml
-      
-      - name: Upload sitemap
-        if: success()
+      - name: Upload theme package
         uses: actions/upload-artifact@v4
         with:
-          name: sitemap
-          path: sitemap.xml
+          name: shopify-theme-zip
+          path: automation/theme.zip
 
   lint:
     runs-on: ubuntu-latest
