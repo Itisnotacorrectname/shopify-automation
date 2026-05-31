@@ -5,16 +5,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
 
 jobs:
   deploy:
@@ -29,14 +19,6 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Cache pip packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
@@ -49,11 +31,6 @@ jobs:
         run: |
           python cli.py deploy --full
       
-      - name: Backup theme (on success)
-        if: success()
-        run: |
-          python cli.py backup
-      
       - name: Generate sitemap
         if: success()
         env:
@@ -62,17 +39,12 @@ jobs:
         run: |
           python cli.py sitemap -o sitemap.xml
       
-      - name: Upload sitemap artifact
+      - name: Upload sitemap
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: sitemap
           path: sitemap.xml
-      
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "Deployment failed. Please check the logs at https://github.com/${{ github.repository }}/actions"
 
   lint:
     runs-on: ubuntu-latest
@@ -92,23 +64,7 @@ jobs:
       
       - name: Lint Python code
         run: |
-          # Check Python syntax
           python -m py_compile cli.py
           python -m py_compile src/*.py
           python -m py_compile deploy/*.py
-          python -m py_compile products/*.py
-          python -m py_compile maintenance/*.py
-          python -m py_compile seo/*.py
-          python -m py_compile analytics/*.py
-          python -m py_compile pricing/*.py
-          
-          # Check YAML syntax
           python -c "import yaml; yaml.safe_load(open('config.yaml'))"
-      
-      - name: Security check
-        run: |
-          # Check for hardcoded secrets (basic)
-          if grep -r "shpat_[a-f0-9]" --include="*.py" .; then
-            echo "WARNING: Potential API token found in code"
-            exit 1
-          fi

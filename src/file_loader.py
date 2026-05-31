@@ -20,8 +20,22 @@ class FileLoader:
             theme_dir: 主题目录路径，默认使用 ../HYL独立站/hyl-shopify-theme
         """
         if theme_dir is None:
-            # 假设文件在 shopify-automation/theme/
-            theme_dir = Path(__file__).parent.parent.parent / "HYL独立站" / "hyl-shopify-theme"
+            # 尝试多种可能的主题目录路径
+            possible_paths = [
+                Path(__file__).parent.parent / "HYL独立站" / "hyl-shopify-theme",
+                Path(__file__).parent.parent / "hyl-shopify-theme",
+                Path(__file__).parent.parent / "theme",
+                Path("..") / "hyl-shopify-theme",  # 相对于 shopify-automation 的上级目录
+                Path(".") / "HYL独立站" / "hyl-shopify-theme",
+            ]
+            
+            for path in possible_paths:
+                if path.exists():
+                    theme_dir = path
+                    break
+            else:
+                # 如果都没找到，使用第一个选项
+                theme_dir = possible_paths[0]
         
         self.theme_dir = Path(theme_dir)
         self._cache: Dict[str, str] = {}
