@@ -22,15 +22,16 @@ class FileLoader:
         if theme_dir is None:
             # 尝试多种可能的主题目录路径
             possible_paths = [
-                Path(__file__).parent.parent / "HYL独立站" / "hyl-shopify-theme",
+                Path(__file__).parent.parent / ".." / "hyl-shopify-theme",  # 上级目录的 hyl-shopify-theme
+                Path(__file__).parent.parent / ".." / "HYL独立站" / "hyl-shopify-theme",
                 Path(__file__).parent.parent / "hyl-shopify-theme",
-                Path(__file__).parent.parent / "theme",
-                Path("..") / "hyl-shopify-theme",  # 相对于 shopify-automation 的上级目录
-                Path(".") / "HYL独立站" / "hyl-shopify-theme",
+                Path(__file__).parent.parent / "HYL独立站" / "hyl-shopify-theme",
+                Path(__file__).parent / "theme",
+                Path("."),
             ]
             
             for path in possible_paths:
-                if path.exists():
+                if path.exists() and (path / "sections").exists() or (path / "layout").exists():
                     theme_dir = path
                     break
             else:

@@ -13,6 +13,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          path: automation
+      
+      - name: Clone theme repository
+        run: |
+          cd automation
+          git clone https://github.com/Itisnotacorrectname/hyl-shopify-theme.git theme || \
+          git clone https://github.com/Itisnotacorrectname/HYL独立站.git HYL独立站 || \
+          echo "Theme repository not found, will use local files"
+          ls -la
       
       - name: Set up Python
         uses: actions/setup-python@v5
