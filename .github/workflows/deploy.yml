@@ -31,7 +31,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          cd automation && pip install -r requirements.txt
       
       - name: Deploy theme
         env:
@@ -39,7 +39,7 @@ jobs:
           SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
           SHOPIFY_THEME_ID: ${{ secrets.SHOPIFY_THEME_ID }}
         run: |
-          python cli.py deploy --full
+          cd automation && python cli.py deploy --full
       
       - name: Generate sitemap
         if: success()
