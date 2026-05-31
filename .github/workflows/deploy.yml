@@ -39,7 +39,7 @@ jobs:
           SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
           SHOPIFY_THEME_ID: ${{ secrets.SHOPIFY_THEME_ID }}
         run: |
-          cd automation && python cli.py deploy --full
+          cd automation && python cli.py deploy --full --theme-dir ./theme || python cli.py deploy --full --theme-dir ./HYL独立站/hyl-shopify-theme
       
       - name: Generate sitemap
         if: success()
